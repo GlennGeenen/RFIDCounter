@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RFIDCounter", "RFIDCounter\RFIDCounter.csproj", "{87EA82B4-921A-42E6-AC28-E6308AD62B25}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E7BBBC86-01D0-4B9A-B7A8-8B53322C4948} = {E7BBBC86-01D0-4B9A-B7A8-8B53322C4948}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeenenRFID", "GeenenRFID\GeenenRFID.csproj", "{E7BBBC86-01D0-4B9A-B7A8-8B53322C4948}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{87EA82B4-921A-42E6-AC28-E6308AD62B25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{87EA82B4-921A-42E6-AC28-E6308AD62B25}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{87EA82B4-921A-42E6-AC28-E6308AD62B25}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{87EA82B4-921A-42E6-AC28-E6308AD62B25}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E7BBBC86-01D0-4B9A-B7A8-8B53322C4948}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E7BBBC86-01D0-4B9A-B7A8-8B53322C4948}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E7BBBC86-01D0-4B9A-B7A8-8B53322C4948}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E7BBBC86-01D0-4B9A-B7A8-8B53322C4948}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

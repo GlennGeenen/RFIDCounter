@@ -17,6 +17,11 @@ namespace GeenenRFID
 
         }
 
+        public bool isConnected()
+        {
+            return m_reader.IsConnected;
+        }
+
         public bool connect(string ip, uint port)
         {
             m_reader = new RFIDReader(ip, port, 0);
@@ -30,6 +35,7 @@ namespace GeenenRFID
             catch (OperationFailureException operationException)
             {
                 Debug.WriteLine(operationException.StatusDescription);
+                return false;
             }
             catch (Exception ex)
             {
@@ -87,14 +93,15 @@ namespace GeenenRFID
         {
             switch (e.StatusEventData.StatusEventType)
             {
-                case Symbol.RFID3.Events.STATUS_EVENT_TYPE.BUFFER_FULL_WARNING_EVENT:
-                    break;
                 case Symbol.RFID3.Events.STATUS_EVENT_TYPE.BUFFER_FULL_EVENT:
+                    Debug.WriteLine("RFID READER BUFFER FULL");
                     break;
                 case Symbol.RFID3.Events.STATUS_EVENT_TYPE.DISCONNECTION_EVENT:
+                    Debug.WriteLine(e.StatusEventData.DisconnectionEventData.DisconnectEventInfo);
                     m_reader.Reconnect();
                     break;
                 case Symbol.RFID3.Events.STATUS_EVENT_TYPE.READER_EXCEPTION_EVENT:
+                    Debug.WriteLine(e.StatusEventData.ReaderExceptionEventData.ReaderExceptionEventInfo);
                     break;
                 default:
                     break;

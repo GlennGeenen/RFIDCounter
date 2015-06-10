@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Globalization;
 
 namespace RFIDCounter.ViewModel
 {
@@ -90,7 +91,9 @@ namespace RFIDCounter.ViewModel
             {
                 using (var client = new HttpClient())
                 {
-                    var json = "{\"lineA\":" + m_laps + ",\"lineB\":\"\"}";
+                    var money = (m_laps / 10.0).ToString("0.00", CultureInfo.InvariantCulture);
+                    var json = "{\"lineA\":{\"type\":\"number\",\"value\":" + m_laps + "},\"lineB\":{\"type\":\"number\",\"value\":" + money.ToString() + "}}";
+
                     var response = await client.PostAsync(m_piUrl, new StringContent(json));
                     var responseString = await response.Content.ReadAsStringAsync();
                 }

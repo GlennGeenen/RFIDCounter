@@ -13,7 +13,5 @@
         <Button Content="Reset" HorizontalAlignment="Left" Margin="407,269,0,0" VerticalAlignment="Top" Width="100" Height="40"/>
         <Button Content="Stop" HorizontalAlignment="Left" Margin="302,269,0,0" VerticalAlignment="Top" Width="100" Height="40" IsEnabled="{Binding isScanning}"/>
         <Button Content="Start" HorizontalAlignment="Left" Margin="197,269,0,0" VerticalAlignment="Top" Width="100" Height="40" IsEnabled="{Binding Stopped}"/>
-        <Label Content="Reader Not Connected" HorizontalAlignment="Left" Margin="10,251,0,0" VerticalAlignment="Top" Width="182"/>
-        <Label Content="Raspberry Not Connected" HorizontalAlignment="Left" Margin="10,283,0,0" VerticalAlignment="Top" Width="182"/>
     </Grid>
 </Window>

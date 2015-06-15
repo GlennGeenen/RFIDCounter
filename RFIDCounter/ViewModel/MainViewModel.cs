@@ -1,13 +1,14 @@
 using GalaSoft.MvvmLight;
 using GeenenRFID;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Globalization;
+using System.Text;
+using System.Net;
+using System.IO;
 
 namespace RFIDCounter.ViewModel
 {
@@ -16,7 +17,7 @@ namespace RFIDCounter.ViewModel
         private GeenenReader m_rfidReader = null;
         private CounterData m_counterData = null;
         List<string> m_allowedChips = null;
-        private string m_piUrl = "";
+        private string m_piUrl = null;
 
         private int m_interval = 10;
         private int m_laps = 0;
@@ -62,6 +63,8 @@ namespace RFIDCounter.ViewModel
 
             readConfig();
             connectRFID();
+
+            sendLapsToPi();
         }
 
         private void readConfig()
@@ -69,7 +72,6 @@ namespace RFIDCounter.ViewModel
             try
             {
                 m_interval = Int32.Parse(ConfigurationManager.AppSettings["ChipInterval"]);
-
                 m_piUrl = "http://" + ConfigurationManager.AppSettings["Raspberry"] + ":" + ConfigurationManager.AppSettings["RaspberryPort"];
 
                 string chips = ConfigurationManager.AppSettings["Chips"];
@@ -85,22 +87,31 @@ namespace RFIDCounter.ViewModel
             }
         }
 
-        private async void sendLapsToPi()
+        private void sendLapsToPi()
         {
-            try
+            if (m_piUrl != null)
             {
-                using (var client = new HttpClient())
+                try
                 {
-                    var money = (m_laps / 10.0).ToString("0.00", CultureInfo.InvariantCulture);
-                    var json = "{\"lineA\":{\"type\":\"number\",\"value\":" + m_laps + "},\"lineB\":{\"type\":\"number\",\"value\":" + money.ToString() + "}}";
+                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(m_piUrl);
+                    request.Method = "POST";
+                    request.ContentType = "application/json";
 
-                    var response = await client.PostAsync(m_piUrl, new StringContent(json));
-                    var responseString = await response.Content.ReadAsStringAsync();
+                    var money = (m_laps / 10.0).ToString("0.00", CultureInfo.InvariantCulture);
+                    var json = "{\"lineA\":{\"type\":\"number\",\"value\":" + m_laps + "},\"lineB\":{\"type\":\"money\",\"value\":" + money.ToString() + "}}";
+
+                    byte[] byteArray = Encoding.UTF8.GetBytes(json);
+                    request.ContentLength = byteArray.Length;
+
+                    using (Stream stream = request.GetRequestStream())
+                    {
+                        stream.Write(byteArray, 0, byteArray.Length);
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex);
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex);
+                }
             }
         }
 

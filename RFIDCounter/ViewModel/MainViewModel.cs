@@ -9,18 +9,27 @@ using System.Globalization;
 using System.Text;
 using System.Net;
 using System.IO;
+using System.Windows.Threading;
+using GalaSoft.MvvmLight.Command;
+using System.Threading.Tasks;
 
 namespace RFIDCounter.ViewModel
 {
     public class MainViewModel : ViewModelBase
     {
+
         private GeenenReader m_rfidReader = null;
         private CounterData m_counterData = null;
-        List<string> m_allowedChips = null;
+        private List<string> m_allowedChips = null;
         private string m_piUrl = null;
 
         private int m_interval = 10;
         private int m_laps = 0;
+        private int test = 0;
+
+        public RelayCommand StartCommand { get; private set; }
+        public RelayCommand StopCommand { get; private set; }
+        public RelayCommand ResetCommand { get; private set; }
 
         public int laps
         {
@@ -43,7 +52,15 @@ namespace RFIDCounter.ViewModel
         {
             get
             {
-                return m_rfidReader.isConnected();
+                if (m_rfidReader != null)
+                {
+                    return m_rfidReader.isConnected();
+                }
+                else
+                {
+                    return false;
+                }
+                
             }
         }
 
@@ -51,20 +68,28 @@ namespace RFIDCounter.ViewModel
         {
             get
             {
-                return !m_rfidReader.isConnected();
+                if (m_rfidReader != null)
+                {
+                    return !m_rfidReader.isConnected();
+                }
+                else
+                {
+                    return true;
+                }
             }
         }
 
         public MainViewModel()
         {
             this.m_counterData = new CounterData();
-            this.laps = this.m_counterData.laps;
+            this.laps = this.m_counterData.m_laps;
             this.m_allowedChips = new List<string>();
 
             readConfig();
-            connectRFID();
 
-            sendLapsToPi();
+            StartCommand = new RelayCommand(start);
+            StopCommand = new RelayCommand(stop);
+            ResetCommand = new RelayCommand(reset);
         }
 
         private void readConfig()
@@ -87,26 +112,47 @@ namespace RFIDCounter.ViewModel
             }
         }
 
+        private void start()
+        {
+            connectRFID();
+            sendLapsToPi();
+        }
+
+        private void stop()
+        {
+            m_rfidReader.disconnect();
+        }
+
+        private void reset()
+        {
+            this.laps = 0;
+        }
+
         private void sendLapsToPi()
         {
-            if (m_piUrl != null)
+            Task.Run(new Action(() => sendLaps(m_piUrl, m_laps)));
+        }
+
+        private static void sendLaps(string url, int myLaps)
+        {
+            if (url != null)
             {
                 try
                 {
-                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(m_piUrl);
+                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
                     request.Method = "POST";
                     request.ContentType = "application/json";
 
-                    var money = (m_laps / 10.0).ToString("0.00", CultureInfo.InvariantCulture);
-                    var json = "{\"lineA\":{\"type\":\"number\",\"value\":" + m_laps + "},\"lineB\":{\"type\":\"money\",\"value\":" + money.ToString() + "}}";
+                    var money = (myLaps / 10.0).ToString("0.00", CultureInfo.InvariantCulture);
+                    var json = "{\"lineA\":{\"type\":\"number\",\"value\":" + myLaps + "},\"lineB\":{\"type\":\"money\",\"value\":" + money.ToString() + "}}";
 
                     byte[] byteArray = Encoding.UTF8.GetBytes(json);
                     request.ContentLength = byteArray.Length;
+                    request.Timeout = 500;
 
-                    using (Stream stream = request.GetRequestStream())
-                    {
-                        stream.Write(byteArray, 0, byteArray.Length);
-                    }
+                    Stream oStreamOut = request.GetRequestStream();
+                    oStreamOut.Write(byteArray, 0, byteArray.Length);
+                    oStreamOut.Close();
                 }
                 catch (Exception ex)
                 {
@@ -133,10 +179,25 @@ namespace RFIDCounter.ViewModel
             }
         }
 
-        void m_rfidReader_ReaderReceivedTags(object sender, RFIDEventArgs e)
+        private void setLapsInUI(int newLaps) 
         {
-            var allowedTags = e.tags.Where(t => m_allowedChips.Contains(t));
-            this.laps = m_counterData.addTags(allowedTags, m_interval);
+            this.laps = newLaps;
         }
+
+        private static int DoWorkAsync(CounterData data, IEnumerable<string> tags, List<string> chips)
+        {
+            var allowedTags = tags.Where(t => chips.Contains(t));
+            return data.addTags(allowedTags, 10);
+        }
+
+        private async void m_rfidReader_ReaderReceivedTags(object sender, RFIDEventArgs e)
+        {
+            var result = await Task.Run(() => DoWorkAsync(m_counterData, e.tags, m_allowedChips));
+            if (result != -1)
+            {
+                App.Current.Dispatcher.Invoke(DispatcherPriority.Normal, new Action(() => setLapsInUI(result)));
+            }
+        }
+
     }
 }

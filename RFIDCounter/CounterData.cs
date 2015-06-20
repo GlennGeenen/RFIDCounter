@@ -4,7 +4,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Threading;
 using System.Timers;
+using System.Windows.Threading;
 using System.Xml.Serialization;
 
 namespace RFIDCounter
@@ -14,9 +16,9 @@ namespace RFIDCounter
         private string m_fileName = "save.xml";
 
         private List<TagData> tagDataList = new List<TagData>();
-        private Timer m_timer = null;
+        //private Timer m_timer = null;
 
-        public int laps = 0;
+        public int m_laps = 0;
 
         public CounterData()
         {
@@ -24,12 +26,12 @@ namespace RFIDCounter
 
             foreach (TagData data in tagDataList)
             {
-                laps += data.seenCount;
+                m_laps += data.seenCount;
             }
 
-            m_timer = new Timer(10000);
-            m_timer.Elapsed += new ElapsedEventHandler(timer_Elapsed);
-            m_timer.Enabled = true; 
+            //m_timer = new Timer(10000);
+            //m_timer.Elapsed += new ElapsedEventHandler(timer_Elapsed);
+            //m_timer.Enabled = true; 
         }
 
         private void timer_Elapsed(object sender, ElapsedEventArgs e)
@@ -40,6 +42,8 @@ namespace RFIDCounter
         public int addTags(IEnumerable<String> tags, int interval)
         {
             DateTime now = DateTime.Now;
+
+            int oldLaps = m_laps;
 
             TagData tag = null;
             foreach (var chip in tags)
@@ -52,18 +56,25 @@ namespace RFIDCounter
                         tag.lastSeen = now;
                         ++tag.seenCount;
                         Console.Beep();
-                        ++this.laps;
+                        ++m_laps;
                     }
                 }
                 else
                 {
                     tagDataList.Add(new TagData(chip, now));
                     Console.Beep();
-                    ++this.laps;
+                    ++m_laps;
                 }
             }
 
-            return this.laps;
+            if (oldLaps != m_laps)
+            {
+                return m_laps;
+            }
+            else
+            {
+                return -1;
+            }
         }
 
         private TagData getChip(string chip)

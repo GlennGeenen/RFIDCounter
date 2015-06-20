@@ -65,7 +65,6 @@ namespace GeenenRFID
             m_reader.Events.AttachTagDataWithReadEvent = false;
 
             m_reader.Events.StatusNotify += new Events.StatusNotifyHandler(Events_StatusNotify);
-            m_reader.Events.NotifyGPIEvent = true;
             m_reader.Events.NotifyBufferFullEvent = true;
             m_reader.Events.NotifyBufferFullWarningEvent = true;
             m_reader.Events.NotifyReaderDisconnectEvent = true;
@@ -97,11 +96,11 @@ namespace GeenenRFID
                     Debug.WriteLine("RFID READER BUFFER FULL");
                     break;
                 case Symbol.RFID3.Events.STATUS_EVENT_TYPE.DISCONNECTION_EVENT:
-                    Debug.WriteLine(e.StatusEventData.DisconnectionEventData.DisconnectEventInfo);
+                    Debug.WriteLine("RFID READER DISCONNECTED");
                     m_reader.Reconnect();
                     break;
                 case Symbol.RFID3.Events.STATUS_EVENT_TYPE.READER_EXCEPTION_EVENT:
-                    Debug.WriteLine(e.StatusEventData.ReaderExceptionEventData.ReaderExceptionEventInfo);
+                    Debug.WriteLine("RFID READER EXCEPTION");
                     break;
                 default:
                     break;

@@ -48,15 +48,26 @@ namespace GeenenRFID
 
         public void disconnect()
         {
-            if (m_reader.Actions.TagAccess.OperationSequence.Length > 0)
+            try
             {
-                m_reader.Actions.TagAccess.OperationSequence.StopSequence();
+                if (m_reader.Actions.TagAccess.OperationSequence.Length > 0)
+                {
+                    m_reader.Actions.TagAccess.OperationSequence.StopSequence();
+                }
+                else
+                {
+                    m_reader.Actions.Inventory.Stop();
+                }
+                m_reader.Disconnect();
             }
-            else
+            catch (OperationFailureException operationException)
             {
-                m_reader.Actions.Inventory.Stop();
+                Debug.WriteLine(operationException.StatusDescription);
             }
-            m_reader.Disconnect();
+            catch (Exception ex)
+            {
+                Debug.WriteLine("RFID Disconnect failed: " + ex.Message);
+            }
         }
 
         private void configureReader()

@@ -5,6 +5,7 @@ using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Timers;
 using System.Windows.Threading;
 using System.Xml.Serialization;
@@ -16,7 +17,7 @@ namespace RFIDCounter
         private string m_fileName = "save.xml";
 
         private List<TagData> tagDataList = new List<TagData>();
-        //private Timer m_timer = null;
+        private System.Timers.Timer m_timer = null;
 
         public int m_laps = 0;
 
@@ -29,14 +30,31 @@ namespace RFIDCounter
                 m_laps += data.seenCount;
             }
 
-            //m_timer = new Timer(10000);
-            //m_timer.Elapsed += new ElapsedEventHandler(timer_Elapsed);
-            //m_timer.Enabled = true; 
+            m_timer = new System.Timers.Timer(30000);
+            m_timer.Elapsed += new ElapsedEventHandler(timer_Elapsed);
         }
 
         private void timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            serialize();
+            Task.Run(new Action(() => serialize(m_fileName, tagDataList)));
+        }
+
+        public void start()
+        {
+            m_timer.Enabled = true; 
+        }
+
+        public void stop()
+        {
+            m_timer.Enabled = false; 
+        }
+
+        public void reset()
+        {
+            string filename = @"saves\" + DateTime.Now.ToString("dd-MM-yyyyTH-mm-ss") + ".xml";
+            serialize(filename, tagDataList);
+            tagDataList = new List<TagData>();
+            serialize(m_fileName, tagDataList);
         }
 
         public int addTags(IEnumerable<String> tags, int interval)
@@ -89,14 +107,14 @@ namespace RFIDCounter
             return null;
         }
 
-        private void serialize()
+        private static void serialize(string fileName, List<TagData> dataList)
         {
             try
             {
                 XmlSerializer serializer = new XmlSerializer(typeof(List<TagData>));
-                using (TextWriter WriteFileStream = new StreamWriter(m_fileName))
+                using (TextWriter WriteFileStream = new StreamWriter(fileName))
                 {
-                    serializer.Serialize(WriteFileStream, tagDataList);
+                    serializer.Serialize(WriteFileStream, dataList);
                 }
             }
             catch (Exception ex)

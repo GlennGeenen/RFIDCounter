@@ -11,7 +11,7 @@
     <Grid>
         <Label Content="{Binding laps}" HorizontalAlignment="Left" Margin="10,86,0,0" VerticalAlignment="Top" Height="118" Width="497" FontSize="72"/>
         <Button Command="{Binding ResetCommand}" Content="Reset" HorizontalAlignment="Left" Margin="407,269,0,0" VerticalAlignment="Top" Width="100" Height="40" IsEnabled="{Binding Stopped}"/>
-        <Button Command="{Binding StopCommand}" Content="Stop" HorizontalAlignment="Left" Margin="302,269,0,0" VerticalAlignment="Top" Width="100" Height="40" IsEnabled="{Binding isScanning}"/>
+        <Button Command="{Binding StopCommand}" Content="Stop" HorizontalAlignment="Left" Margin="302,269,0,0" VerticalAlignment="Top" Width="100" Height="40" IsEnabled="{Binding Started}"/>
         <Button Command="{Binding StartCommand}" Content="Start" HorizontalAlignment="Left" Margin="197,269,0,0" VerticalAlignment="Top" Width="100" Height="40" IsEnabled="{Binding Stopped}"/>
     </Grid>
 </Window>

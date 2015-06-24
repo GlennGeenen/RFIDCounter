@@ -25,7 +25,7 @@ namespace RFIDCounter.ViewModel
 
         private int m_interval = 10;
         private int m_laps = 0;
-        private int test = 0;
+        private bool m_started = false;
 
         public RelayCommand StartCommand { get; private set; }
         public RelayCommand StopCommand { get; private set; }
@@ -48,19 +48,20 @@ namespace RFIDCounter.ViewModel
             }
         }
 
-        public bool isScanning
+        public bool Started
         {
             get
             {
-                if (m_rfidReader != null)
+                return m_started;
+            }
+            set
+            {
+                if (m_started != value)
                 {
-                    return m_rfidReader.isConnected();
+                    m_started = value;
+                    RaisePropertyChanged("Started");
+                    RaisePropertyChanged("Stopped");
                 }
-                else
-                {
-                    return false;
-                }
-                
             }
         }
 
@@ -68,14 +69,7 @@ namespace RFIDCounter.ViewModel
         {
             get
             {
-                if (m_rfidReader != null)
-                {
-                    return !m_rfidReader.isConnected();
-                }
-                else
-                {
-                    return true;
-                }
+                return !m_started;
             }
         }
 
@@ -115,16 +109,22 @@ namespace RFIDCounter.ViewModel
         private void start()
         {
             connectRFID();
+            m_counterData.start();
+            this.Started = true;
+
             sendLapsToPi();
         }
 
         private void stop()
         {
             m_rfidReader.disconnect();
+            m_counterData.stop();
+            this.Started = false;
         }
 
         private void reset()
         {
+            m_counterData.reset();
             this.laps = 0;
         }
 

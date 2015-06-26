@@ -23,7 +23,7 @@ namespace RFIDCounter.ViewModel
         private List<string> m_allowedChips = null;
         private string m_piUrl = null;
 
-        private int m_interval = 10;
+        private static int s_interval = 10;
         private int m_laps = 0;
         private bool m_started = false;
 
@@ -90,7 +90,7 @@ namespace RFIDCounter.ViewModel
         {
             try
             {
-                m_interval = Int32.Parse(ConfigurationManager.AppSettings["ChipInterval"]);
+                s_interval = Int32.Parse(ConfigurationManager.AppSettings["ChipInterval"]);
                 m_piUrl = "http://" + ConfigurationManager.AppSettings["Raspberry"] + ":" + ConfigurationManager.AppSettings["RaspberryPort"];
 
                 string chips = ConfigurationManager.AppSettings["Chips"];
@@ -148,7 +148,7 @@ namespace RFIDCounter.ViewModel
 
                     byte[] byteArray = Encoding.UTF8.GetBytes(json);
                     request.ContentLength = byteArray.Length;
-                    request.Timeout = 500;
+                    request.Timeout = 250;
 
                     Stream oStreamOut = request.GetRequestStream();
                     oStreamOut.Write(byteArray, 0, byteArray.Length);
@@ -187,7 +187,7 @@ namespace RFIDCounter.ViewModel
         private static int DoWorkAsync(CounterData data, IEnumerable<string> tags, List<string> chips)
         {
             var allowedTags = tags.Where(t => chips.Contains(t));
-            return data.addTags(allowedTags, 10);
+            return data.addTags(allowedTags, s_interval);
         }
 
         private async void m_rfidReader_ReaderReceivedTags(object sender, RFIDEventArgs e)

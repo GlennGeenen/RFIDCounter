@@ -54,6 +54,7 @@ namespace RFIDCounter
             string filename = @"saves\" + DateTime.Now.ToString("dd-MM-yyyyTH-mm-ss") + ".xml";
             serialize(filename, tagDataList);
             tagDataList = new List<TagData>();
+            m_laps = 0;
             serialize(m_fileName, tagDataList);
         }
 
